@@ -7,8 +7,8 @@ Gem::Specification.new do |gem|
   gem.version       = "0.0.1"
   gem.authors       = ["Vlad Bokov"]
   gem.email         = ["bokov.vlad@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.summary       = %q{This is awesome}
+  gem.description   = %q{Handles your HTTP requests in background in non-blocking way using Resque worker}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
