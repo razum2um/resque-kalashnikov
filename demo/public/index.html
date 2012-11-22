@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+  </head>
+  <body>
+    <h1>Test#home</h1>
+    <form method='POST' action='/test/home'>
+      <select name='method'>
+        <option value='get'>GET</option>
+        <option value='post'>POST</option>
+      </select>
+
+      <select name='url'>
+        <option value='/test/slow'>Slow: /test/slow</option>
+        <option value='/test/unrelaible'>Unrelaible: /test/unrelaible</option>
+      </select>
+
+      <input type='submit' value='Begin!' />
+    </form>
+  </body>
+</html>
