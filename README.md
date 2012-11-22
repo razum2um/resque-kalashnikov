@@ -6,7 +6,7 @@ TODO: Write a gem description
 
 Add this line to your application's Gemfile:
 
-    gem 'resque-kalashnikov'
+    gem 'resque-kalashnikov', require: 'resque_kalashnikov'
 
 And then execute:
 
