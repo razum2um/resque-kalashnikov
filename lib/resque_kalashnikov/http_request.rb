@@ -1,5 +1,6 @@
+require 'net/http'
 #require "em-synchrony/em-http"
-require 'em-http-request'
+#require 'em-http-request'
 
 module ResqueKalashnikov
   module HttpRequest
@@ -13,10 +14,11 @@ module ResqueKalashnikov
       @method = opts.delete('method') || 'get'
       @opts = opts
 
-      @http = EM::HttpRequest.new(@url).send(@method, @opts)
+      Net::HTTP.get URI.parse @url
+      #@http = EM::HttpRequest.new(@url).send(@method, @opts)
       #@http = EM::HttpRequest.new('http://httplogger.herokuapp.com/bvlog/get?id=123').get
-      @http.callback { success }
-      @http.errback { failure }
+      #@http.callback { success }
+      #@http.errback { failure }
     end
 
     def success

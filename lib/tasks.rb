@@ -21,7 +21,7 @@ namespace :resque do
 
     queues = (ENV['QUEUES'] || ENV['QUEUE']).to_s.split(',')
 
-    EM.synchrony do
+    #EM.synchrony do
       # Redis 2
       #require 'redis'
       #
@@ -32,7 +32,7 @@ namespace :resque do
 
       # Redis 3
       #Resque.redis = Redis.new(driver: :hiredis)   # won't send
-      Resque.redis = Redis.new(driver: :synchrony) # send, disconnects after 3rd enqueue
+      #Resque.redis = Redis.new(driver: :synchrony) # send, disconnects after 3rd enqueue
 
       # Pure Hiredis
       #require "em-hiredis"                 # won't start - Resque is sync
@@ -48,9 +48,9 @@ namespace :resque do
       worker = Resque::Worker.new(*queues)
       worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
       worker.log "Starting worker #{worker}"
-      worker.work(ENV['INTERVAL'] || 1)
+      worker.work(ENV['INTERVAL'] || 5)
 
       ['TERM', 'INT', 'QUIT'].each { |signal| trap(signal) { worker.shutdown } }
-    end
+    #end
   end
 end

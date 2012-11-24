@@ -1,7 +1,3 @@
-#require 'net/http'
-#require "em-synchrony/em-http"
-#require 'em-http-request'
-
 module Resque::Plugins
   module ResqueKalashnikov
 
@@ -17,7 +13,7 @@ module Resque::Plugins
       queues - ['test_queue']
     end
 
-    def work_sync_on(job)
+    def work_sync_on(job, &block)
       if @child = fork(job)
         srand # Reseeding
         procline "Forked #{@child} at #{Time.now.to_i}"
@@ -36,7 +32,7 @@ module Resque::Plugins
       end
     end
 
-    def work_async_on(job)
+    def work_async_on(job, &block)
       klass = job.payload_class
       args = job.payload['args']
 
@@ -44,42 +40,53 @@ module Resque::Plugins
       klass.perform *args
     end
 
+    def can_async_job?(job)
+      job.queue['async']
+    end
+
+    def job_fiber interval
+      Fiber.new do
+        loop do
+          if job = reserve
+            log! "got job in job fiber: #{job.inspect}"
+            Fiber.yield job
+          else
+            break if paused?
+            log! "Sleeping for #{interval} seconds"
+            procline paused? ? "Paused" : "Waiting for #{@queues.join(',')}"
+            sleep interval
+          end
+        end
+        shutdown
+      end
+    end
+
     def work_with_kalashnikov(interval=5.0, &block)
       interval = Float(interval)
       $0 = "resque: Starting Kalashnikov"
       startup
-
       loop do
-        break if shutdown?
+        job = job_fiber(interval).resume 
 
-        if not paused? and job = reserve
-          redis.client.reconnect
-          log "got: #{job.inspect}"
-          job.worker = self
-          working_on job
+        log! "got job in worker fiber: #{job.inspect}"
+        job.worker = self
+        working_on job
 
-          if job.queue['test_queue']
-            work_async_on job
-          else
-            work_sync_on job
-            @child = nil
-          end
-
-          done_working
+        if can_async_job? job
+          Fiber.new do
+            work_async_on job, &block
+          end.resume
         else
-          break if interval.zero?
-          log! "Sleeping for #{interval} seconds"
-          procline paused? ? "Paused" : "Waiting for #{@queues.join(',')}"
-          sleep interval
+          work_sync_on job, &block
+          @child = nil
         end
+        done_working
       end
-
       unregister_worker
-      EM.stop if no_workers_left?
     rescue Exception => exception
-      log exception.backtrace.to_s
+      log! exception.to_s
+      log! exception.backtrace.to_s
       unregister_worker(exception)
-      EM.stop if no_workers_left?
     end
 
     def self.included(receiver)
