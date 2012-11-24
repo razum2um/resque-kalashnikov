@@ -1,5 +1,5 @@
 #require 'net/http'
-require "em-synchrony/em-http"
+#require "em-synchrony/em-http"
 #require 'em-http-request'
 
 module Resque::Plugins
@@ -37,15 +37,11 @@ module Resque::Plugins
     end
 
     def work_async_on(job)
-      #raise job.payload.to_s
-      args = job.payload['args'][0]
-      #Fiber.new do
-        url = args['url']
-        log "in fiber: url=#{url}"
-        #EM::Synchrony.sync
-        EM::HttpRequest.new(url).get
-        #Net::HTTP.get URI.parse url
-      #end.resume
+      klass = job.payload_class
+      args = job.payload['args']
+
+      log "in fiber: class=#{klass.class} args=#{args}"
+      klass.perform *args
     end
 
     def work_with_kalashnikov(interval=5.0, &block)
@@ -63,9 +59,9 @@ module Resque::Plugins
 
           if job.queue['test_queue']
             work_async_on job
-            @child = nil
           else
             work_sync_on job
+            @child = nil
           end
 
           done_working
@@ -78,7 +74,7 @@ module Resque::Plugins
       end
 
       unregister_worker
-      #EM.stop if no_workers_left?
+      EM.stop if no_workers_left?
     rescue Exception => exception
       log exception.backtrace.to_s
       unregister_worker(exception)

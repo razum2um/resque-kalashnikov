@@ -25,7 +25,7 @@ namespace :resque do
       worker = Resque::Worker.new(*queues)
       worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
       worker.log "Starting worker #{worker}"
-      worker.work(ENV['INTERVAL'] || 5)
+      worker.work(ENV['INTERVAL'] || 1)
 
       ['TERM', 'INT', 'QUIT'].each { |signal| trap(signal) { worker.shutdown } }
     end
