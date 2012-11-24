@@ -60,5 +60,6 @@ module ResqueKalashnikovDemo
     # config.active_record.whitelist_attributes = true
 
     config.middleware.use PryRescue::Rack if Rails.env.development?
+    config.autoload_paths += Dir["#{Rails.root}/app/workers/"]
   end
 end

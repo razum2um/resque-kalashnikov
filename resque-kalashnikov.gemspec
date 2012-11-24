@@ -1,10 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'resque_kalashnikov/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "resque-kalashnikov"
-  gem.version       = "0.0.1"
+  gem.version       = ResqueKalashnikov::VERSION
   gem.authors       = ["Vlad Bokov"]
   gem.email         = ["bokov.vlad@gmail.com"]
   gem.summary       = %q{This is awesome}
@@ -18,7 +19,10 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('resque', '~> 1.23.0')
   gem.add_dependency('resque-scheduler', '~> 2.0.0')
-  gem.add_dependency('em-resque', '~> 1.1.1')
+  #gem.add_dependency('em-resque', '~> 1.1.1')
+  gem.add_dependency('em-synchrony')
+  gem.add_dependency('em-hiredis')
+  gem.add_dependency('em-http-request')
 
   gem.add_development_dependency('rspec')
   gem.add_development_dependency('resque_spec')
