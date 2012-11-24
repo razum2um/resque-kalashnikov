@@ -2,27 +2,29 @@ require "json"
 require "em-synchrony/em-http"
 
 module ResqueKalashnikov
-  class HttpRequest < EventMachine::HttpRequest
-    def self.perform(opts=nil)
-      return unless opts
+  module HttpRequest
 
-      opts = JSON.parse opts
-      url = opts.delete 'url'
-      method = opts.delete 'method'
-      opts = opts
+    extend self
 
-      http = EventMachine::HttpRequest.new(url).send(method, opts)
-      http.callback { on_success }
-      http.errback { on_failure }
-      http
+    def perform(*args)
+      opts = args[0].dup
+
+      @url = opts.delete 'url'
+      @method = opts.delete('method') || 'get'
+      @opts = opts
+
+      #@http = EventMachine::HttpRequest.new(@url).send(@method, @opts)
+      @http = EventMachine::HttpRequest.new('http://httplogger.herokuapp.com/bvlog/get?id=123').get
+      @http.callback { on_success }
+      @http.errback { on_failure }
     end
 
-    def self.on_success
-      puts 'success'
+    def on_success
+      Resque.logger.info 'success'
     end
 
-    def self.on_failure
-      puts 'failure'
+    def on_failure
+      Resque.logger.info 'failure'
     end
   end
 end

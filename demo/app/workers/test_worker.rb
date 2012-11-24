@@ -1,7 +1,4 @@
 class TestWorker
+  extend ResqueKalashnikov::HttpRequest
   @queue = :test_queue
-
-  def self.perform(*args)
-    puts "oops: #{args}"
-  end
 end

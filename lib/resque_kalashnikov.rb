@@ -91,3 +91,12 @@ module ResqueKalashnikov
     include ClassMethods
   end
 end
+
+require 'resque'
+require 'resque/worker'
+require 'resque-dynamic-queues'
+require "resque_kalashnikov/http_request"
+require "resque/plugins/resque_kalashnikov/resque_kalashnikov"
+
+Resque::Worker.send(:include, Resque::Plugins::ResqueKalashnikov)
+Resque::Worker.send(:extend, Resque::Plugins::ResqueKalashnikov::ClassMethods)
