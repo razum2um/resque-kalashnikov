@@ -53,6 +53,7 @@ module Resque::Plugins
         break if shutdown?
 
         if not paused? and job = reserve
+          redis.client.reconnect
           log "got: #{job.inspect}"
           job.worker = self
           working_on job
@@ -79,15 +80,6 @@ module Resque::Plugins
       log exception.backtrace.to_s
       unregister_worker(exception)
       EM.stop if no_workers_left?
-    end
-
-    module ClassMethods
-      def all
-        workers = EM::Synchrony.sync redis.smembers(:workers)
-        log workers.to_s
-        log '\n'
-        Array(workers).map { |id| find(id) }.compact
-      end
     end
 
     def self.included(receiver)

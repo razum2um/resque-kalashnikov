@@ -6,8 +6,9 @@ gem 'rails', '3.2.8'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'resque', path: '/www/3rd-party/resque', require: 'resque/server', branch: '1-x-stable'
-gem 'resque-scheduler', require: 'resque_scheduler'
+#gem 'resque-scheduler', require: 'resque_scheduler'
 gem 'resque-kalashnikov', path: '/www/resque-kalashnikov', require: 'resque_kalashnikov'
+gem 'em-synchrony' #, '= 1.0.1' #git: 'git://github.com/igrigorik/em-synchrony.git'
 
 group :test, :development do
   gem 'pry-rails'

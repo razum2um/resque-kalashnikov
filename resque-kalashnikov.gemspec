@@ -19,7 +19,9 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('resque', '~> 1.23.0')
   gem.add_dependency('resque-dynamic-queues')
-  gem.add_dependency('resque-scheduler', '~> 2.0.0')
+  #gem.add_dependency('resque-scheduler')
+  #gem.add_dependency('redis', '~> 2.2.0')
+  gem.add_dependency('redis', '> 3.0.0')
   #gem.add_dependency('em-resque', '~> 1.1.1')
   gem.add_dependency('em-synchrony')
   gem.add_dependency('em-hiredis')
