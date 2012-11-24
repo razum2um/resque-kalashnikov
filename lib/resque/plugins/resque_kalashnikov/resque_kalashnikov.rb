@@ -1,6 +1,3 @@
-#require "em-synchrony/em-http"
-require 'em-http-request'
-
 module Resque::Plugins
   module ResqueKalashnikov
 
@@ -19,11 +16,6 @@ module Resque::Plugins
 
         if can_async_job? job
           Fiber.new do
-            #url = job.args[0]['url']
-            #log "got url: #{url}"
-            #http = EM::HttpRequest.new(url).get
-            #http.callback { log 'success' }
-            #http.errback  { log 'fail!' }
             work_async_on job, &block
           end.resume
         else

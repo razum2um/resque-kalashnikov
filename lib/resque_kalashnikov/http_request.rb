@@ -1,6 +1,4 @@
 require 'net/http'
-#require "em-synchrony/em-http"
-#require 'em-http-request'
 
 module ResqueKalashnikov
   module HttpRequest
