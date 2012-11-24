@@ -5,6 +5,6 @@ class TestWorker
   def self.success
     #EM.synchrony.sleep 10
     #sleep 10
-    #Resque.logger.info 'ok'
+    Resque.logger.info 'ok'
   end
 end

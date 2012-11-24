@@ -5,12 +5,10 @@ gem 'rails', '3.2.8'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'resque', path: '/www/3rd-party/resque', require: 'resque/server', branch: '1-x-stable'
-#gem 'resque-scheduler', require: 'resque_scheduler'
-gem 'resque-kalashnikov', path: '/www/resque-kalashnikov', require: 'resque_kalashnikov'
-gem 'em-synchrony' #, '= 1.0.1' #git: 'git://github.com/igrigorik/em-synchrony.git'
+gem 'resque', require: 'resque/server'
+gem 'resque-kalashnikov', github: 'razum2um/resque-kalashnikov', branch: 'master', require: 'resque_kalashnikov'
 
-group :test, :development do
+group :development do
   gem 'pry-rails'
   gem 'pry-rescue'
   gem 'pry-stack_explorer'

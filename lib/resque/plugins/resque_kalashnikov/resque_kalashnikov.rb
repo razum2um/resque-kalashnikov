@@ -1,16 +1,52 @@
+#require "em-synchrony/em-http"
+require 'em-http-request'
+
 module Resque::Plugins
   module ResqueKalashnikov
 
-    def no_workers_left?
-      Resque::Worker.all.count == 0
+    def work_with_kalashnikov(interval=5.0, &block)
+      interval = Float(interval)
+      $0 = "resque: Starting Kalashnikov"
+      startup
+      loop do
+        break if shutdown?
+
+        job = job_fiber(interval).resume 
+
+        log "got job in worker fiber: #{job.inspect}"
+        job.worker = self
+        working_on job
+
+        if can_async_job? job
+          Fiber.new do
+            #url = job.args[0]['url']
+            #log "got url: #{url}"
+            #http = EM::HttpRequest.new(url).get
+            #http.callback { log 'success' }
+            #http.errback  { log 'fail!' }
+            work_async_on job, &block
+          end.resume
+        else
+          work_sync_on job, &block
+          @child = nil
+        end
+        done_working
+      end
+      unregister_worker
+    rescue Exception => exception
+      log exception.to_s
+      log exception.backtrace.to_s
+      unregister_worker(exception)
     end
 
-    def em_queues
-      queues & ['test_queue']
+    private
+
+    def shutdown?
+      super || no_workers?
     end
 
-    def non_em_queues
-      queues - ['test_queue']
+    def no_workers?
+      ::Resque::Worker.all.size == 0
     end
 
     def work_sync_on(job, &block)
@@ -36,7 +72,7 @@ module Resque::Plugins
       klass = job.payload_class
       args = job.payload['args']
 
-      log "in fiber: class=#{klass.class} args=#{args}"
+      log "in fiber: class=#{klass} args=#{args}"
       klass.perform *args
     end
 
@@ -47,46 +83,24 @@ module Resque::Plugins
     def job_fiber interval
       Fiber.new do
         loop do
+          break if shutdown?
           if job = reserve
-            log! "got job in job fiber: #{job.inspect}"
+            log "got job in job fiber: #{job.inspect}"
             Fiber.yield job
           else
             break if paused?
-            log! "Sleeping for #{interval} seconds"
+            log "Sleeping for #{interval} seconds"
             procline paused? ? "Paused" : "Waiting for #{@queues.join(',')}"
             sleep interval
           end
         end
-        shutdown
+        unregister_worker
       end
     end
 
-    def work_with_kalashnikov(interval=5.0, &block)
-      interval = Float(interval)
-      $0 = "resque: Starting Kalashnikov"
-      startup
-      loop do
-        job = job_fiber(interval).resume 
-
-        log! "got job in worker fiber: #{job.inspect}"
-        job.worker = self
-        working_on job
-
-        if can_async_job? job
-          Fiber.new do
-            work_async_on job, &block
-          end.resume
-        else
-          work_sync_on job, &block
-          @child = nil
-        end
-        done_working
-      end
-      unregister_worker
-    rescue Exception => exception
-      log! exception.to_s
-      log! exception.backtrace.to_s
-      unregister_worker(exception)
+    def unregister_worker(exception=nil)
+      super
+      EM.stop
     end
 
     def self.included(receiver)

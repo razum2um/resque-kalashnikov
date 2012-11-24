@@ -2,9 +2,9 @@ class TestController < ApplicationController
   layout false
 
   def home
-    5.times do
-      Resque.enqueue Resque::Plugins::Kalashnikov, params[:method].upcase!, params[:url]
-    end
+    #5.times do
+    #  Resque.enqueue Resque::Plugins::Kalashnikov, params[:method].upcase!, params[:url]
+    #end
     redirect_to resque_server_path
   end
 
