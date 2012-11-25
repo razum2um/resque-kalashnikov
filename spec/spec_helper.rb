@@ -1,11 +1,13 @@
 require 'rubygems'
 require 'resque'
 #require 'webmock/rspec'
-require 'eventmachine'
+require 'em-synchrony'
+require 'em-synchrony/em-hiredis'
 
 $dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift $dir + '/../lib'
 require 'resque_kalashnikov'
+require 'support/stub_server'
 $TESTING = true
 
 RSpec.configure do |config|
@@ -15,17 +17,12 @@ RSpec.configure do |config|
   config.order = 'random'
 end
 
-DELAY = 5 #0.25
-
 class SlowHttpRequest < ResqueKalashnikov::HttpRequest
   @queue = :async_queue
 
   def handle http
-    File.open('/tmp/1', 'a'){ |f| f.write http.response_header.status }
-    puts http.response
-    #sleep DELAY
-    #puts http.response_header.status
+    File.open("/tmp/kalashnikov-#{$$}.log", "a") do |f|
+      f.write "#{DateTime.now}:#{http.response_header.status}:#{http.response}\n"
+    end
   end
 end
-
-def now(); Time.now.to_f; end

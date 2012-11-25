@@ -1,26 +1,14 @@
-require 'em-synchrony/em-hiredis'
-
 module Resque::Plugins
   module ResqueKalashnikov
 
-    def hiredis
-      return @hiredis if @hiredis
-      self.hiredis = EM::Hiredis.connect
-      puts "hiredis connected"
-      self.hiredis
-    end
-
     def work_with_kalashnikov(interval=5.0, &block)
-      @fibers = []
       interval = Float(interval)
-      $0 = "resque: Starting Kalashnikov"
+      @fibers = []
       startup
 
       loop do
         break if shutdown?
-
-        job = job_fiber(interval) #.resume 
-        puts ">>>>>> job: #{job.inspect}"
+        job = reserve
 
         log "got job in worker fiber: #{job.inspect}"
         job.worker = self
@@ -30,12 +18,26 @@ module Resque::Plugins
         if can_do_job_async? job
           @fibers << work_async_on(job, &block)
         else
-          work_sync_on job, &block
+          work_sync_on(job, &block)
           @child = nil
         end
+        monitor(interval)
         done_working
       end
       unregister_worker
+
+    rescue EM::ForcedStop => e
+      # happens in fiber-mode
+      # EM has stopped but we need 
+      # to reconnect to report it
+      Resque.redis = Redis.connect
+      unregister_worker
+    rescue Resque::Helpers::DecodeException => e
+      # agian, happens in fork-mode
+      raise e unless e.to_s['Redis disconnected']
+      Resque.redis = Redis.connect
+      unregister_worker
+
     rescue Exception => exception
       log exception.to_s
       log exception.backtrace.to_s
@@ -45,10 +47,9 @@ module Resque::Plugins
     def inspect_with_kalashnikov
       "#<KalashnikovWorker #{to_s}>"
     end
-    #private
 
     def work_sync_on(job, &block)
-      puts 'sync'
+      log 'work sync'
       if @child = fork(job)
         srand # Reseeding
         procline "Forked #{@child} at #{Time.now.to_i}"
@@ -61,77 +62,65 @@ module Resque::Plugins
       else
         unregister_signal_handlers if will_fork? && term_child
         procline "Processing #{job.queue} since #{Time.now.to_i}"
-        reconnect
+        #reconnect # cannot do it with hiredis
         perform(job, &block)
         exit!(true) if will_fork?
       end
     end
 
     def work_async_on(job, &block)
-      puts "async"
-      #shutdown if Resque.size(:async_queue) == 0
+      log "work async"
       Fiber.new do
-        perform job, &block
+        perform(job, &block)
       end.tap &:resume
     end
 
+    # if resque worker gonna to stop - stop EM
+    # essentially, fiber-singleton
+    def monitor(interval)
+      @monitor ||= Fiber.new do
+        EM.add_periodic_timer(interval) do
+          # monitor itself doesnt count in @fibers
+          if (@fibers = @fibers.select(&:alive?)).empty?
+            EM.stop if shutdown?
+          else
+            log "Big brother says: #{@fibers.size} fibers alive"
+          end
+        end
+      end.tap &:resume
+    end
+
+    # test whenether we can do job async
+    # based on its name
     def can_do_job_async?(job)
       !! job.queue['async']
     end
 
-    def job_fiber interval
+    def reserve_with_kalashnikov
       queues = Resque.queues.map { |q| "queue:#{q}" }
-      #Fiber.new do
-      #  loop do
-          puts "job fiber loop, queues:#{queues}"
 
-          #break if shutdown?
-          #redis.info
-          #puts "job fiber before blpop: #{hiredis.client.connected?}"
-          queue, value = redis.blpop(*queues, 0) #.callback { |queue, value|
-          puts "popped: q=#{queue} v=#{value}"
-          payload = decode value
-          job = Resque::Job.new queue, payload
-          #Fiber.yield job
-          #}
+      # NO block for EM since using hiredis + em-synchrony
+      queue, value = redis.blpop(*queues, 0)
 
+      # shit happens if monitor fiber stops EM
+      # it should happen only in tests
+      raise EM::ForcedStop.new(queue) if queue['Redis disconnected']
 
-          #if job = reserve
-          #  log "got job in job fiber: #{job.inspect}"
-          #  Fiber.yield job
-          #else
-          #  break if paused?
-          #  log "Sleeping for #{interval} seconds"
-          #  procline paused? ? "Paused" : "Waiting for #{@queues.join(',')}"
-          #  sleep interval
-          #end
-      #  end
-      #  unregister_worker
-      #end
-    end
-
-    # if resque gonna to stop - stop EM
-    def unregister_worker_with_kalashnikov(exception=nil)
-      unregister_worker_without_kalashnikov(exception)
-      if @fibers
-        EM.add_periodic_timer(1) do
-          EM.stop if @fibers.none? &:alive?
-        end
-      end
+      log "popped: q=#{queue} v=#{value}"
+      payload = decode value
+      Resque::Job.new queue, payload
     end
 
     def self.included(receiver)
       receiver.class_eval do
-        attr_accessor :hiredis
-
         alias work_without_kalashnikov work
         alias work work_with_kalashnikov
 
         alias inspect_without_kalashnikov inspect
         alias inspect inspect_with_kalashnikov
 
-        alias unregister_worker_without_kalashnikov unregister_worker
-        alias unregister_worker unregister_worker_with_kalashnikov
+        alias reserve_without_kalashnikov reserve
+        alias reserve reserve_with_kalashnikov
       end
     end
   end # ResqueKalashnikov

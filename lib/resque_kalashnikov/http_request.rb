@@ -13,7 +13,6 @@ module ResqueKalashnikov
     # This method is invoked inside EM
     # no blocking calls, please
     def perform
-      puts "performing url=#{url} method=#{method} opts=#{opts}"
       f = Fiber.current
       http = EM::HttpRequest.new(url).get #send(method, opts)
       http.callback { f.resume(http) }
