@@ -1,21 +1,34 @@
-require 'net/http'
+require "em-http-request"
 
 module ResqueKalashnikov
-  module HttpRequest
+  class HttpRequest
+    attr_accessor :url, :method, :opts
 
-    extend self
+    def initialize(*args)
+      @url, @opts = args
+      @opts ||= {}
+      @method = @opts.delete('method') || 'get'
+    end
 
-    # This method is invoked inside running Fiber
-    # you can leave blocking net/http
-    def perform(*args)
-      opts = args[0].dup
+    # This method is invoked inside EM
+    # no blocking calls, please
+    def perform
+      puts "performing url=#{url} method=#{method} opts=#{opts}"
+      f = Fiber.current
+      http = EM::HttpRequest.new(url).get #send(method, opts)
+      http.callback { f.resume(http) }
+      http.errback  { f.resume(http) }
+      handle Fiber.yield
+    end
 
-      url = opts.delete 'url'
-      method = opts.delete('method') || 'get'
-      opts = opts
+    def handle http
+      http.response
+    end
 
-      Net::HTTP.get URI.parse url
-      #Resque.logger.info "failure: #{@http.response_header.status}\n#{@http.response_header}"
+    class << self
+      def perform(*args)
+        new(*args).perform
+      end
     end
   end
 end

@@ -1,10 +1,8 @@
-class TestWorker
-  extend ResqueKalashnikov::HttpRequest
+class TestWorker < ResqueKalashnikov::HttpRequest
   @queue = :async_queue
 
-  def self.success
-    #EM.synchrony.sleep 10
+  def handle http
     #sleep 10
-    Resque.logger.info 'ok'
+    puts "test worker #{http.response_header.status}"
   end
 end
