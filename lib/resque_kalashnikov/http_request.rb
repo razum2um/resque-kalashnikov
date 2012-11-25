@@ -1,27 +1,31 @@
-require "em-http-request"
+require "em-synchrony/em-http"
 
 module ResqueKalashnikov
   class HttpRequest
-    attr_accessor :url, :method, :opts
-
+    attr_accessor :url, :http_method, :opts
     def initialize(*args)
       @url, @opts = args
       @opts ||= {}
-      @method = @opts.delete('method') || 'get'
+      @http_method = @opts.delete('http_method') || 'get'
+      @http_method.downcase!
     end
 
     # This method is invoked inside EM
     # no blocking calls, please
     def perform
-      f = Fiber.current
-      http = EM::HttpRequest.new(url).get #send(method, opts)
-      http.callback { f.resume(http) }
-      http.errback  { f.resume(http) }
-      handle Fiber.yield
+      handle EM::HttpRequest.new(url).send http_method, query: opts
     end
 
     def handle http
       http.response
+    end
+
+    def http_method
+      valid_methods.include?(@http_method) ? @http_method : 'get'
+    end
+
+    def valid_methods
+      ['get', 'post', 'head', 'delete', 'put', 'options', 'patch']
     end
 
     class << self

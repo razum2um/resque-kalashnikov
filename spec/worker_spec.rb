@@ -14,31 +14,16 @@ describe 'Resque::Worker' do
     #@worker.verbose = true # useful to see sync/async difference
   end
 
-  def async_server(response_status=200, delay=0)
-    EM.synchrony do
-      Resque.redis = EM::Hiredis.connect
-      s = StubServer.new response_status, delay
-      yield
-      s.stop
-    end
-  end
-
   def now(); Time.now.to_f; end
-
-  def get_url(attrs={})
-    attrs = {n:0}.merge(attrs)
-    "http://127.0.0.1:8081/?id=#{attrs[:n]}&kind=#{attrs[:kind]}"
-    #"http://httplogger.herokuapp.com/bvlog/get?id=#{attrs[:n]}&kind=#{attrs[:method]}"
-  end
 
   def create_async_job(attrs={})
     attrs.merge! kind: 'async'
-    Resque::Job.create(:async_queue, SlowHttpRequest, get_url(attrs), attrs)
+    Resque::Job.create(:async_queue, SlowHttpRequest, async_server_url(attrs), attrs)
   end
 
   def create_sync_job(attrs={})
     attrs.merge! kind: 'sync'
-    Resque::Job.create(:sync_queue, SlowHttpRequest, get_url(attrs), attrs)
+    Resque::Job.create(:sync_queue, SlowHttpRequest, async_server_url(attrs), attrs)
   end
 
   it 'has proper name' do
