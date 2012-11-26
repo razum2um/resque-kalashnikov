@@ -20,4 +20,22 @@ describe ResqueKalashnikov::Server do
     get '/kalashnikov'
     last_response.status.should == 200
   end
+
+  describe 'actions' do
+    before do
+      @request_key = Base64.encode64 Resque.encode [SlowHttpRequest, [async_server_url, {method: 'post'}]]
+      @fake_redis = double
+      Redis.stub(:connect).and_return(@fake_redis)
+    end
+
+    it 'can retry jobs' do
+      @fake_redis.should_receive(:rpush).once
+      post '/kalashnikov/retry/500', {request_key: @request_key}
+    end
+
+    it 'can reset misfire count' do
+      @fake_redis.should_receive(:rpush).once
+      post '/kalashnikov/retry/500', {request_key: @request_key}
+    end
+  end
 end

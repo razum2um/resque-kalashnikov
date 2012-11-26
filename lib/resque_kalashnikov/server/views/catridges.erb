@@ -9,7 +9,6 @@
   </tr>
   <% statuses.sort.each do |status, count| %>
   <tr>
-    <%#<td class='queue'><a class="queue" href="<%= u "queues/#{queue}" % >"><%= queue % ></a></td> %>
     <td class='status'><%= status %></td>
     <td class='size'><%= count %></td>
   </tr>
@@ -30,7 +29,6 @@
   </tr>
   <% resque.kalashnikov_misfire_stats(misfire_stats_key).sort_by { |k,v| v } .reverse.each do |misfire_json, count| %>
   <tr>
-    <%#<td class='queue'><a class="queue" href="<%= u "queues/#{queue}" % >"><%= queue % ></a></td> %>
     <% job, payload = resque.decode misfire_json %>
     <% url, options = payload %>
     <td class='job'><%= job %></td>

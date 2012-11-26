@@ -15,7 +15,7 @@ describe 'ResqueKalashnikov::HttpRequest' do
     it "stores valid #{http_method} methods" do
       stub_request(http_method.to_sym, async_server_url).to_return success_response
       EM.synchrony do
-        build("http_method" => http_method).perform.should == 'success'
+        build("http_method" => http_method).send(:http_request).response.should == 'success'
         EM.stop
       end
     end
@@ -25,7 +25,7 @@ describe 'ResqueKalashnikov::HttpRequest' do
     it "stores valid #{http_method} methods" do
       stub_request(http_method.to_sym, async_server_url).to_return success_response
       EM.synchrony do
-        build("http_method" => http_method).perform.should == ''
+        build("http_method" => http_method).send(:http_request).response.should == ''
         EM.stop
       end
     end
@@ -34,8 +34,8 @@ describe 'ResqueKalashnikov::HttpRequest' do
   it 'stores invalid methods as GET' do
     stub_request(:get, async_server_url).to_return success_response
     EM.synchrony do
-      build.perform.should == 'success'
-      build('http_method' => 'foobar').perform.should == 'success'
+      build.send(:http_request).response.should == 'success'
+      build('http_method' => 'foobar').send(:http_request).response.should == 'success'
       EM.stop
     end
   end
@@ -52,13 +52,13 @@ describe 'ResqueKalashnikov::HttpRequest' do
       build(
         "a" => ["b", "c"],
         "d" => "e"
-      ).perform.should == 'success'
+      ).send(:http_request).response.should == 'success'
 
       build(
         "url" => async_server_url({n: 1, kind: 'async'}),
         "http_method" => "post",
         "d" => "e"
-      ).perform.should == 'success'
+      ).send(:http_request).response.should == 'success'
       EM.stop
     end
   end
