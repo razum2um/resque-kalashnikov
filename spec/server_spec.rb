@@ -3,15 +3,14 @@ require "resque_kalashnikov/server"
 
 ENV['RACK_ENV'] = 'test'
 
-require 'rack/test'
-include Rack::Test::Methods
-
-def app
-  Resque::Server
-end
-
-
 describe ResqueKalashnikov::Server do
+  require 'rack/test'
+  include Rack::Test::Methods
+
+  def app
+    Resque::Server
+  end
+
   it 'has Kalashnikov tab' do
     get '/overview'
     last_response.body.should =~ /kalashnikov/
