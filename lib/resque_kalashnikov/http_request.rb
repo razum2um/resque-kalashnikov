@@ -17,17 +17,21 @@ module ResqueKalashnikov
       Resque::Catridge.new(self, http)
     end
 
-    def perform
-      catrige = handle http_request
-      reload if catrige.respond_to?(:reload) && catrige.reload?
-      http_request.response
+    def retry_limit
+      1
     end
 
-    private
+    def perform
+      catrige = handle http_request
+      reload if catrige.respond_to?(:retries) && catrige.retries < retry_limit
+      http_request.response
+    end
 
     def reload_opts
       opts.merge http_method: http_method
     end
+
+    private
 
     def reload
       Resque.enqueue self.class, url, reload_opts

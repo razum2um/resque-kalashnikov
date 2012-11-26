@@ -24,6 +24,24 @@ module ResqueKalashnikov
         get "/kalashnikov" do
           render_erb 'server/views/catridges.erb'
         end
+
+        post "/kalashnikov/retry/:status" do
+          status = params[:status]
+          klass_name, args = Resque.decode Base64.decode64 params[:request_key]
+          klass = Resque::Job.constantize klass_name
+          queue = Resque.queue_from_class(klass)
+          redis = Redis.connect
+          redis.rpush "resque:queue:#{queue}", Resque.encode(:class => klass_name, :args => args)
+          redirect u('/kalashnikov')
+        end
+
+        post "/kalashnikov/reset/:status" do
+          status = params[:status]
+          request_key = Base64.decode64 params[:request_key]
+          redis = Redis.connect
+          redis.hset "resque:kalashnikov:misfires:#{status}", request_key, 0
+          redirect u('/kalashnikov')
+        end
       end
     end
 

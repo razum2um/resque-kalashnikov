@@ -46,7 +46,7 @@ describe 'Resque::Worker' do
     queue_size = 20
     queue_size.times { |n| create_async_job(n: n) }
 
-    async_server(200, DELAY) do
+    async_server([200], DELAY) do
       start = now
       @worker.work(0) do |job|
         # block yields in Worker#perform in "ensure" part
@@ -71,7 +71,7 @@ describe 'Resque::Worker' do
     queue_size = 3
     queue_size.times { |n| create_sync_job(n: n) }
 
-    async_server(200, DELAY) do
+    async_server([200], DELAY) do
       start = now
       @worker.work(0) do |job|
         @worker.shutdown if Resque.size(:sync_queue) == 0
@@ -79,6 +79,36 @@ describe 'Resque::Worker' do
 
       # O(n)
       (now - start).should be_within(DELAY*queue_size*2).of(DELAY*queue_size)
+    end
+  end
+
+  it 'handles 404 & 500 error async' do
+    queue_size = 20
+    queue_size.times { |n| create_async_job(n: n) }
+
+    async_server([500, 404], DELAY) do
+      start = now
+      @worker.work(0) do |job|
+        @worker.shutdown #if Resque.size(:async_queue) == 0
+      end
+
+      # O(1)
+      (now - start).should be_within(DELAY*2).of(DELAY)
+    end
+  end
+
+  it 'handles random async jobs' do
+    queue_size = 20
+    queue_size.times { |n| create_async_job(n: n) }
+
+    async_server([200, 404, 500], DELAY) do
+      start = now
+      @worker.work(0) do |job|
+        @worker.shutdown #if Resque.size(:async_queue) == 0
+      end
+
+      # O(1)
+      (now - start).should be_within(DELAY*2).of(DELAY)
     end
   end
 end

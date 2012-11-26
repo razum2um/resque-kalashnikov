@@ -2,10 +2,12 @@ require 'spec_helper'
 
 describe Resque::Catridge do
   before do
-    fake_redis = double
-    fake_redis.stub(:rpush)
-    fake_redis.stub(:hincrby)
-    Resque::Catridge.stub(:redis).and_return(fake_redis)
+    @fake_redis = double
+    @fake_redis.stub(:hget)
+    @fake_redis.stub(:rpush)
+    @fake_redis.stub(:hincrby)
+    @fake_redis.stub(:keys)
+    Resque::Catridge.stub(:redis).and_return(@fake_redis)
   end
 
   def fake_response_with_status(status)

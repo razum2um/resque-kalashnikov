@@ -15,3 +15,41 @@
   </tr>
   <% end %>
 </table>
+
+<% resque.kalashnikov_misfire_codes.each do |misfire_stats_key| %>
+<% status = misfire_stats_key.split(':').last %>
+<h1 class='wi'>Error code: <%= status %></h1>
+<table>
+  <tr>
+    <th>Job</th>
+    <th>URL</th>
+    <th>Options</th>
+    <th>Retries</th>
+    <th>Retry</th>
+    <th>Reset retries</th>
+  </tr>
+  <% resque.kalashnikov_misfire_stats(misfire_stats_key).sort_by { |k,v| v } .reverse.each do |misfire_json, count| %>
+  <tr>
+    <%#<td class='queue'><a class="queue" href="<%= u "queues/#{queue}" % >"><%= queue % ></a></td> %>
+    <% job, payload = resque.decode misfire_json %>
+    <% url, options = payload %>
+    <td class='job'><%= job %></td>
+    <td class='url'><a href="<%= url %>"><%= url %></a></td>
+    <td class='options'><%= options %></td>
+    <td class='size'><%= count %></td>
+    <td class='url'>
+      <form method="POST" action="<%= u %Q{kalashnikov/retry/#{status}} %>" >
+        <input name="request_key" type="hidden" value="<%= Base64.encode64 misfire_json %>" />
+        <input type='submit' name='' value='Retry' />
+      </form>
+     </td>
+    <td class='url'>
+      <form method="POST" action="<%= u %Q{kalashnikov/reset/#{status}} %>" >
+        <input name="request_key" type="hidden" value="<%= Base64.encode64 misfire_json %>" />
+        <input type='submit' name='' value='Reset' />
+      </form>
+     </td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
