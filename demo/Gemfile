@@ -6,7 +6,7 @@ gem 'rails', '3.2.8'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'resque', require: 'resque/server'
-gem 'resque-kalashnikov', github: 'razum2um/resque-kalashnikov', branch: 'master', require: 'resque_kalashnikov'
+gem 'resque-kalashnikov', github: 'razum2um/resque-kalashnikov', branch: 'master', require: ['resque_kalashnikov', 'resque_kalashnikov/server']
 
 group :development do
   gem 'pry-rails'

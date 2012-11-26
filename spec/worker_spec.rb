@@ -4,9 +4,6 @@ DELAY = 0.5
 
 describe 'Resque::Worker' do
   before do
-    Resque.redis = Resque.redis # reset state in Resque object
-    Resque.redis.flushall
-
     Resque.before_first_fork = nil
     Resque.before_fork = nil
     Resque.after_fork = nil
@@ -46,7 +43,7 @@ describe 'Resque::Worker' do
   end
 
   it 'handles async queues with fibers' do
-    queue_size = 10
+    queue_size = 20
     queue_size.times { |n| create_async_job(n: n) }
 
     async_server(200, DELAY) do
@@ -66,12 +63,12 @@ describe 'Resque::Worker' do
       end
 
       # O(1)
-      (now - start).should be_within(DELAY*0.5).of(DELAY)
+      (now - start).should be_within(DELAY*2).of(DELAY)
     end
   end
 
   it 'handles sync queues with processes' do
-    queue_size = 10
+    queue_size = 3
     queue_size.times { |n| create_sync_job(n: n) }
 
     async_server(200, DELAY) do
@@ -81,7 +78,7 @@ describe 'Resque::Worker' do
       end
 
       # O(n)
-      (now - start).should be_within(DELAY*queue_size*0.5).of(DELAY*queue_size)
+      (now - start).should be_within(DELAY*queue_size*2).of(DELAY*queue_size)
     end
   end
 end

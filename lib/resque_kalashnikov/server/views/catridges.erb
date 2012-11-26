@@ -1,0 +1,17 @@
+<% statuses = resque.kalashnikov_stats %>
+
+<h1 class='wi'>Kalashnikov</h1>
+<p class='intro'>The list below contains statistics of Kalashnikov</p>
+<table>
+  <tr>
+    <th>HTTP code</th>
+    <th>Jobs done</th>
+  </tr>
+  <% statuses.sort.each do |status, count| %>
+  <tr>
+    <%#<td class='queue'><a class="queue" href="<%= u "queues/#{queue}" % >"><%= queue % ></a></td> %>
+    <td class='status'><%= status %></td>
+    <td class='size'><%= count %></td>
+  </tr>
+  <% end %>
+</table>

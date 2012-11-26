@@ -3,6 +3,7 @@ require "em-synchrony/em-http"
 module ResqueKalashnikov
   class HttpRequest
     attr_accessor :url, :http_method, :opts
+
     def initialize(*args)
       @url, @opts = args
       @opts ||= {}
@@ -12,12 +13,28 @@ module ResqueKalashnikov
 
     # This method is invoked inside EM
     # no blocking calls, please
-    def perform
-      handle EM::HttpRequest.new(url).send http_method, query: opts
+    def handle http
+      Resque::Catridge.new(self, http)
     end
 
-    def handle http
-      http.response
+    def perform
+      catrige = handle http_request
+      reload if catrige.respond_to?(:reload) && catrige.reload?
+      http_request.response
+    end
+
+    private
+
+    def reload_opts
+      opts.merge http_method: http_method
+    end
+
+    def reload
+      Resque.enqueue self.class, url, reload_opts
+    end
+
+    def http_request
+      EM::HttpRequest.new(url).send http_method, query: opts
     end
 
     def http_method

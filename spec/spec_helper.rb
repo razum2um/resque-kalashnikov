@@ -2,6 +2,7 @@ require 'rubygems'
 require 'resque'
 require 'em-synchrony'
 require 'em-synchrony/em-hiredis'
+require 'webmock/rspec'
 
 $dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift $dir + '/../lib'
@@ -20,6 +21,7 @@ class SlowHttpRequest < ResqueKalashnikov::HttpRequest
   @queue = :async_queue
 
   def handle http
+    super
     File.open("/tmp/kalashnikov-#{$$}.log", "a") do |f|
       f.write "#{DateTime.now}:#{http.response_header.status}:#{http.response}\n"
     end
@@ -27,8 +29,13 @@ class SlowHttpRequest < ResqueKalashnikov::HttpRequest
 end
 
 def async_server(response_status=200, delay=0)
+  WebMock.allow_net_connect!
   EM.synchrony do
-    Resque.redis = EM::Hiredis.connect
+    #Resque.redis = EM::Hiredis.connect
+    Resque.redis = EM::Synchrony::ConnectionPool.new(size: 3) do
+      EM::Hiredis.connect
+    end
+    #Resque.redis.flushall # reset state in Resque object
     s = StubServer.new response_status, delay
     yield
     s.stop

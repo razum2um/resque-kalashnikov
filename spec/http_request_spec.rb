@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'webmock/rspec'
 
 describe 'ResqueKalashnikov::HttpRequest' do
 
@@ -61,6 +60,24 @@ describe 'ResqueKalashnikov::HttpRequest' do
         "d" => "e"
       ).perform.should == 'success'
       EM.stop
+    end
+  end
+
+  describe 'error handling' do
+    it 'handles 4xx responses' do
+      stub_request(:any, async_server_url).to_return(:status => [404, "Not Found"])
+      EM.synchrony do
+        build.send(:http_request).response_header.status.should == 404
+        EM.stop
+      end
+    end
+
+    it 'handles 5xx responses' do
+      stub_request(:any, async_server_url).to_return(:status => [500, "Internal Server Error"])
+      EM.synchrony do
+        build.send(:http_request).response_header.status.should == 500
+        EM.stop
+      end
     end
   end
 end
