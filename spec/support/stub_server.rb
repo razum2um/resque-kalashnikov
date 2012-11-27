@@ -32,7 +32,7 @@ end
 
 if __FILE__ == $0
   EM.run do
-    s = StubServer.new([200, 404, 500], 0)
+    s = StubServer.new(ARGV || [200], 0)
     puts 'Started on http://localhost:8081/'
 
     ['TERM', 'INT', 'QUIT'].each do |signal|

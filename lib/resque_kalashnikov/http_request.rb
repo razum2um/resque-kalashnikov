@@ -18,7 +18,7 @@ module ResqueKalashnikov
     end
 
     def retry_limit
-      3
+      instance_variable_get(:@retry_limit) || 3
     end
 
     def perform

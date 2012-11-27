@@ -46,7 +46,35 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+1. Start it as normal Resque
+
+    QUEUE='async_queue,sync_queue' bundle exec rake environment resque:fire
+
+2. Enqueue ResqueKalashnikov::HttpRequest.
+
+    Resque.enqueue ResqueKalashnikov::HttpRequest, 'http://localhost:8081/', {http_method: 'post', foo: 'bar'}
+
+By default it retries all http codes in range 300-600 3 times. For customizing it do your own job.
+
+    class SlowHttpRequest < ResqueKalashnikov::HttpRequest
+      @queue = :some_async_queue
+      @retry_limit = 5 
+    end
+
+Note, that @queue **must** match /async/
+
+## Testing
+
+Test suite is provided with a small EM test webserver. It can be run
+manyally for acceptance tests without mocking the web.
+
+Again, thanks @igrigorik!
+
+Besides it's delay option, now it can also randomize HTTP anwser codes:
+
+    ruby spec/support/stub_server.rb 200 404 500
+
+It runs on http://localhost:8081 
 
 ## Contributing
 

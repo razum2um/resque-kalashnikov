@@ -19,7 +19,6 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('resque', '~> 1.23.0')
   gem.add_dependency('redis', '> 3.0.0')
-  gem.add_dependency('eventmachine')
   gem.add_dependency('em-http-request')
   gem.add_dependency('em-synchrony')
   gem.add_dependency('em-hiredis')
