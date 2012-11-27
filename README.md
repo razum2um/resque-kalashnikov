@@ -55,11 +55,11 @@ and be sure you have in config/routes.rb
 
 ## Usage
 
-1. Start it as normal Resque
+Start it as normal Resque
 
     QUEUE='async_queue,sync_queue' bundle exec rake environment resque:fire
 
-2. Enqueue ResqueKalashnikov::HttpRequest.
+Enqueue ResqueKalashnikov::HttpRequest.
 
     Resque.enqueue ResqueKalashnikov::HttpRequest, 'http://localhost:8081/', {http_method: 'post', foo: 'bar'}
 
