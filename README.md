@@ -18,7 +18,7 @@
 * Resque's INTERVAL is yet meaningless. It's 0. Redis is polled with blpop.
   As such, please, set infinite timeout for server:
 
-    # /etc/redis.conf
+    \# /etc/redis.conf
     timeout = 0
 
 * Currently, you cannot do QUEUE= * Please, list your queues
@@ -45,6 +45,14 @@ And then execute:
 Or install it yourself as:
 
     $ gem install resque-kalashnikov
+
+For WebUI:
+
+    gem 'resque-kalashnikov', require: ['resque_kalashnikov', 'resque_kalashnikov/server']
+
+and be sure you have in config/routes.rb
+
+    mount Resque::Server, at: '/resque'
 
 ## Usage
 
