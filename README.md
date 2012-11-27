@@ -61,7 +61,7 @@ Start it as normal Resque
 
 Enqueue ResqueKalashnikov::HttpRequest.
 
-    Resque.enqueue ResqueKalashnikov::HttpRequest, 'http://localhost:8081/', {http_method: 'post', foo: 'bar'}
+    Resque.enqueue ResqueKalashnikov::HttpRequest, 'http://localhost:8081/', :post, foo: 'bar'
 
 By default it retries all http codes in range 300-600 3 times. For customizing it do your own job.
 
@@ -88,6 +88,7 @@ It runs on http://localhost:8081
 ## Build Status
 
 [![Build Status](https://secure.travis-ci.org/razum2um/resque-kalashnikov.png?branch=master)](https://travis-ci.org/razum2um/resque-kalashnikov)
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/razum2um/resque-kalashnikov)
 
 ## Contributing
 
