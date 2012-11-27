@@ -4,7 +4,8 @@ describe 'ResqueKalashnikov::HttpRequest' do
 
   def build(attrs={})
     url = attrs.delete('url') || async_server_url
-    ResqueKalashnikov::HttpRequest.new(url, attrs)
+    http_method = attrs.delete('http_method') || 'get'
+    ResqueKalashnikov::HttpRequest.new(url, http_method, attrs)
   end
 
   def success_response

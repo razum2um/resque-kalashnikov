@@ -21,6 +21,7 @@
 <table>
   <tr>
     <th>Job</th>
+    <th>HTTP</th>
     <th>URL</th>
     <th>Options</th>
     <th>Retries</th>
@@ -30,8 +31,9 @@
   <% resque.kalashnikov_misfire_stats(misfire_stats_key).sort_by { |k,v| v } .reverse.each do |misfire_json, count| %>
   <tr>
     <% job, payload = resque.decode misfire_json %>
-    <% url, options = payload %>
+    <% url, http_method, options = payload %>
     <td class='job'><%= job %></td>
+    <td class='http_method'><%= http_method.upcase %></td>
     <td class='url'><a href="<%= url %>"><%= url %></a></td>
     <td class='options'><%= options %></td>
     <td class='size'><%= count %></td>

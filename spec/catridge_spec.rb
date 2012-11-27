@@ -19,6 +19,7 @@ describe Resque::Catridge do
   def fake_request
     request = double
     request.stub(:url).and_return 'some-url'
+    request.stub(:http_method).and_return 'get'
     request.stub(:reload_opts).and_return 'some-opts'
     request
   end

@@ -20,7 +20,7 @@ module Resque
     private
 
     def serialized_request
-      Resque.encode([request.class.to_s, [request.url, request.reload_opts]])
+      Resque.encode([request.class.to_s, [request.url, request.http_method, request.reload_opts]])
     end
 
     def log

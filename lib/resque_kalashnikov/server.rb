@@ -11,12 +11,6 @@ module ResqueKalashnikov
 
     def self.included(base)
       base.class_eval do
-        helpers do
-          def queue_from_class_name(class_name)
-            Resque.queue_from_class(Resque.constantize(class_name))
-          end
-        end
-
         get "/kalashnikov" do
           render_erb 'server/views/catridges.erb'
         end
