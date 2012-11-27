@@ -23,8 +23,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency('em-synchrony')
   gem.add_dependency('em-hiredis')
 
-  gem.add_development_dependency('debugger')
   gem.add_development_dependency('webmock')
   gem.add_development_dependency('rspec')
-  gem.add_development_dependency('resque_spec')
 end
