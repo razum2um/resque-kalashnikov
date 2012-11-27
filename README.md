@@ -1,5 +1,7 @@
 # Resque::Kalashnikov - fast, fiber-based URL hitter for Resque
 
+[![screenshot](http://www.diigo.com/item/image/2aamo/iubn)](http://www.diigo.com/item/image/2aamo/iubn?size=o)
+
 ## Warnings
 
 * It's EM, bro! Don't call sleep and other blocking stuff inside your
