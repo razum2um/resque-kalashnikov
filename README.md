@@ -16,9 +16,8 @@
   fetch from database * many times at once) can be painful for RAM
 
 * Resque's INTERVAL is yet meaningless. It's 0. Redis is polled with blpop.
-  As such, please, set infinite timeout for server:
+  As such, please, set infinite timeout for server in /etc/redis.conf
 
-    \# /etc/redis.conf
     timeout = 0
 
 * Currently, you cannot do QUEUE= * Please, list your queues
