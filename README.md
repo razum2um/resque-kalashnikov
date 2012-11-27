@@ -83,7 +83,11 @@ Besides it's delay option, now it can also randomize HTTP anwser codes:
 
     ruby spec/support/stub_server.rb 200 404 500
 
-It runs on http://localhost:8081 
+It runs on http://localhost:8081
+
+## Build Status
+
+[![Build Status](https://secure.travis-ci.org/razum2um/resque-kalashnikov.png?branch=master)](https://travis-ci.org/razum2um/resque-kalashnikov)
 
 ## Contributing
 
