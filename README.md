@@ -1,6 +1,6 @@
 # Resque::Kalashnikov - fast, fiber-based URL hitter for Resque
 
-[![screenshot](http://www.diigo.com/item/image/2aamo/iubn)](http://www.diigo.com/item/image/2aamo/iubn?size=o)
+![screenshot](https://raw.github.com/razum2um/resque-kalashnikov/master/screenshot.png)
 
 ## Warnings
 
