@@ -37,8 +37,7 @@ module Resque
 
     def misfire?
       case status
-      when 500 then true
-      when 404 then true
+      when 300..600 then true
       else
         false
       end
@@ -54,7 +53,7 @@ module Resque
         'kalashnikov'
       end
 
-      # DI here
+      # DI here, please
       def redis
         Resque.redis
       end
@@ -78,6 +77,9 @@ module Resque
       end
 
       def reset_stats
+        stats.keys.each do |http_code|
+          redis.del "#{ns}:misfires:#{http_code}"
+        end
         redis.del "#{ns}:stat"
       end
     end

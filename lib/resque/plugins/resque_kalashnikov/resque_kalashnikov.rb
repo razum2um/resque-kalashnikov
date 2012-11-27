@@ -84,7 +84,8 @@ module Resque::Plugins
           if (@fibers = @fibers.select(&:alive?)).empty?
             EM.stop if shutdown?
           else
-            log "Big brother says: #{@fibers.size} fibers alive"
+            log! "Big brother says: #{@fibers.size} fibers alive"
+            log! ObjectSpace.count_objects.to_s
           end
         end
       end.tap &:resume
@@ -100,7 +101,9 @@ module Resque::Plugins
       queues = Resque.queues.map { |q| "queue:#{q}" }
 
       # NO block for EM since using hiredis + em-synchrony
+      GC.enable
       queue, value = redis.blpop(*queues, 0)
+      GC.disable
 
       # shit happens if monitor fiber stops EM
       # it should happen only in tests

@@ -85,7 +85,6 @@ describe 'Resque::Worker' do
   it 'handles 404 & 500 error async' do
     queue_size = 20
     queue_size.times { |n| create_async_job(n: n) }
-
     async_server([500, 404], DELAY) do
       start = now
       @worker.work(0) do |job|

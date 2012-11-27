@@ -35,7 +35,7 @@ end
 def async_server(response_status=200, delay=0)
   WebMock.allow_net_connect!
   EM.synchrony do
-    #Resque.redis = EM::Hiredis.connect
+    #EM::HttpRequest.new('http://httplogger.herokuapp.com/bvlog/clear').get if async_server_url['herokuapp']
     Resque.redis = EM::Synchrony::ConnectionPool.new(size: 3) do
       EM::Hiredis.connect
     end
@@ -47,10 +47,10 @@ def async_server(response_status=200, delay=0)
 end
 
 def async_server_url(attrs={})
+  #return "http://httplogger.herokuapp.com/bvlog/get"
   if attrs.empty?
     "http://127.0.0.1:8081"
   else
     "http://127.0.0.1:8081/?n=#{attrs[:n]}&kind=#{attrs[:kind]}"
   end
-  #"http://httplogger.herokuapp.com/bvlog/get?id=#{attrs[:n]}&kind=#{attrs[:method]}"
 end

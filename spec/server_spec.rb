@@ -37,5 +37,10 @@ describe ResqueKalashnikov::Server do
       @fake_redis.should_receive(:rpush).once
       post '/kalashnikov/retry/500', {request_key: @request_key}
     end
+
+    it 'can reset everyhing' do
+      Resque::Catridge.should_receive(:reset_stats)
+      get '/kalashnikov/reset_stats'
+    end
   end
 end

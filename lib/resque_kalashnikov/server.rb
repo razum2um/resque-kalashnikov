@@ -12,10 +12,6 @@ module ResqueKalashnikov
     def self.included(base)
       base.class_eval do
         helpers do
-          def format_time(t)
-            t.strftime("%Y-%m-%d %H:%M:%S %z")
-          end
-
           def queue_from_class_name(class_name)
             Resque.queue_from_class(Resque.constantize(class_name))
           end
@@ -32,6 +28,7 @@ module ResqueKalashnikov
           queue = Resque.queue_from_class(klass)
           redis = Redis.connect
           redis.rpush "resque:queue:#{queue}", Resque.encode(:class => klass_name, :args => args)
+          sleep 3 # FIXME: if refreshed immediately - no effect seen - instead, can be polled 
           redirect u('/kalashnikov')
         end
 
@@ -40,6 +37,11 @@ module ResqueKalashnikov
           request_key = Base64.decode64 params[:request_key]
           redis = Redis.connect
           redis.hset "resque:kalashnikov:misfires:#{status}", request_key, 0
+          redirect u('/kalashnikov')
+        end
+
+        get "/kalashnikov/reset_stats" do
+          Resque::Catridge.reset_stats
           redirect u('/kalashnikov')
         end
       end

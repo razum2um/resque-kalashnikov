@@ -18,12 +18,12 @@ module ResqueKalashnikov
     end
 
     def retry_limit
-      1
+      3
     end
 
     def perform
       catrige = handle http_request
-      reload if catrige.respond_to?(:retries) && catrige.retries < retry_limit
+      reload if catrige.reload? && catrige.retries < retry_limit
       http_request.response
     end
 
