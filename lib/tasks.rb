@@ -21,7 +21,7 @@ namespace :resque do
     end
 
     worker = Resque::Worker.new(*queues)
-    worker.verbose = true
+    #worker.verbose = true
 
     EM.synchrony do
       Resque.redis = EM::Synchrony::ConnectionPool.new(size: 100) do
