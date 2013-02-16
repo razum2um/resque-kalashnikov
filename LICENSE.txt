@@ -1,4 +1,4 @@
-Copyright (c) 2012 Vlad Bokov
+Copyright (c) 2013 Vlad Bokov
 
 MIT License
 
