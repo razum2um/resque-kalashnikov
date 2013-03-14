@@ -3,6 +3,8 @@ require 'resque'
 require 'em-synchrony'
 require 'em-synchrony/em-hiredis'
 require 'webmock/rspec'
+require 'coveralls'
+Coveralls.wear!
 
 $dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift $dir + '/../lib'
