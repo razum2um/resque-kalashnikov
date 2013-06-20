@@ -88,7 +88,7 @@ It runs on http://localhost:8081
 ## Build Status
 
 [![Build Status](https://secure.travis-ci.org/razum2um/resque-kalashnikov.png?branch=master)](https://travis-ci.org/razum2um/resque-kalashnikov)
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/razum2um/resque-kalashnikov)
+[![Code Climate](https://codeclimate.com/github/razum2um/resque-kalashnikov.png)](https://codeclimate.com/github/razum2um/resque-kalashnikov)
 
 ## Contributing
 
